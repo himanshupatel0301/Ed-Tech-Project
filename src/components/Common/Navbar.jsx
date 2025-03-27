@@ -17,7 +17,7 @@ function Navbar() {
   const { totalItems } = useSelector((state) => state.cart)
   const location = useLocation()
 
-  const [subLinks, setSubLinks] = useState([])  // Ensure subLinks is never undefined
+  const [subLinks, setSubLinks] = useState([])
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
@@ -25,10 +25,12 @@ function Navbar() {
       setLoading(true)
       try {
         const res = await apiConnector("GET", categories.CATEGORIES_API)
-        setSubLinks(Array.isArray(res.data?.data) ? res.data.data : []) // Ensure it's an array
+        console.log("Fetched Categories:", res.data)  // Debugging line
+
+        setSubLinks(Array.isArray(res.data?.data) ? res.data.data : [])
       } catch (error) {
         console.error("Could not fetch Categories.", error)
-        setSubLinks([]) // Fallback to prevent undefined errors
+        setSubLinks([])
       }
       setLoading(false)
     })()
@@ -45,12 +47,10 @@ function Navbar() {
       } transition-all duration-200`}
     >
       <div className="flex w-11/12 max-w-maxContent items-center justify-between">
-        {/* Logo */}
         <Link to="/">
           <img src={logo} alt="Logo" width={160} height={32} loading="lazy" />
         </Link>
         
-        {/* Navigation links */}
         <nav className="hidden md:block">
           <ul className="flex gap-x-6 text-richblack-25">
             {NavbarLinks.map((link, index) => (
@@ -71,15 +71,12 @@ function Navbar() {
                         
                         {loading ? (
                           <p className="text-center">Loading...</p>
-                        ) : subLinks.length > 0 ? (
+                        ) : subLinks?.length > 0 ? (
                           subLinks
-                            .filter((subLink) => Array.isArray(subLink?.courses) && subLink.courses.length > 0)  
+                            .filter((subLink) => Array.isArray(subLink?.courses) && subLink.courses.length > 0)
                             .map((subLink, i) => (
                               <Link
-                                to={`/catalog/${subLink.name
-                                  .split(" ")
-                                  .join("-")
-                                  .toLowerCase()}`}
+                                to={`/catalog/${subLink.name.replace(/\s+/g, "-").toLowerCase()}`}
                                 className="rounded-lg bg-transparent py-4 pl-4 hover:bg-richblack-50"
                                 key={i}
                               >
@@ -110,7 +107,6 @@ function Navbar() {
           </ul>
         </nav>
 
-        {/* Login / Signup / Dashboard */}
         <div className="hidden items-center gap-x-4 md:flex">
           {user && user?.accountType !== ACCOUNT_TYPE.INSTRUCTOR && (
             <Link to="/dashboard/cart" className="relative">
